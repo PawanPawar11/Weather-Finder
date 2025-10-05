@@ -40,6 +40,8 @@ const App = () => {
   const [cityToSearch, setCityToSearch] = useState<string>("");
   const [cityWeather, setCityWeather] = useState<CityWeather | null>(null);
 
+  const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+
   useEffect(() => {
     if (!cityToSearch) return;
 
@@ -47,7 +49,7 @@ const App = () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `http://api.openweathermap.org/geo/1.0/direct?q=${cityToSearch}&limit=5&appid=57b0e17d17e7ac2c4512642f5bca0f88`
+          `http://api.openweathermap.org/geo/1.0/direct?q=${cityToSearch}&limit=5&appid=${apiKey}`
         );
 
         if (!response.ok) {
@@ -70,7 +72,7 @@ const App = () => {
     };
 
     fetchGeoLocationData();
-  }, [cityToSearch]);
+  }, [cityToSearch, apiKey]);
 
   useEffect(() => {
     const fetchActualWeatherData = async () => {
@@ -79,7 +81,7 @@ const App = () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${weatherData[0].lat}&lon=${weatherData[0].lon}&appid=57b0e17d17e7ac2c4512642f5bca0f88&units=metric`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${weatherData[0].lat}&lon=${weatherData[0].lon}&appid=${apiKey}&units=metric`
         );
 
         const result: CityWeather = await response.json();
@@ -94,7 +96,7 @@ const App = () => {
     };
 
     fetchActualWeatherData();
-  }, [weatherData]);
+  }, [weatherData, apiKey]);
 
   return (
     <div className="h-screen w-screen bg-[#1f2937] flex items-center justify-center">
