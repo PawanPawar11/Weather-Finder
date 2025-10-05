@@ -1,6 +1,6 @@
-import { useEffect, useState, type ChangeEvent } from "react";
-import { Input } from "./components/ui/input";
-import { Button } from "./components/ui/button";
+import { useEffect, useState } from "react";
+import SearchBar from "./components/SearchBar";
+import WeatherDisplay from "./components/WeatherDisplay";
 
 interface GeoLocation {
   name: string;
@@ -9,7 +9,7 @@ interface GeoLocation {
   country: string;
 }
 
-interface CityWeather {
+export interface CityWeather {
   name: string;
   sys: {
     country: string;
@@ -33,12 +33,12 @@ interface FetchError extends Error {
 }
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [weatherData, setWeatherData] = useState<GeoLocation[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [cityToSearch, setCityToSearch] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [cityWeather, setCityWeather] = useState<CityWeather | null>(null);
+  const [cityToSearch, setCityToSearch] = useState<string>("");
 
   const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -62,7 +62,7 @@ const App = () => {
         }
 
         setWeatherData(result);
-        setError(null);
+        setError(null); // Let's say if you user inputs some invalid city, then it will throw the error. Now error is not anymore null, but let's say this time user enters the correct city name but he will not see the result because the error state still contains the previous error state's value. And hence the reason why we need to clear it this way →  setError(null)
       } catch (error) {
         const err = error as FetchError;
         setError(err.message);
@@ -101,77 +101,16 @@ const App = () => {
   return (
     <div className="h-screen w-screen bg-[#1f2937] flex items-center justify-center">
       <div className="w-[22rem] h-auto overflow-auto bg-[#111827] rounded-lg px-6 py-4 flex flex-col justify-start gap-4">
-        <h1 className="text-2xl  text-center font-bold text-[#22d3ee]">
-          Weather Finder
-        </h1>
-        <Input
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setSearchTerm(e.target.value)
-          }
-          className="bg-[#374151] text-white border-none"
-          type="text"
-          placeholder="Enter your city name..."
+        <SearchBar
+          setCityToSearch={setCityToSearch}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
         />
-        <Button
-          onClick={() => setCityToSearch(searchTerm)}
-          className="bg-[#09a1c7] text-white text-sm font-bold outline-none border-none hover:bg-[#0890b2df] transition-all duration-500 hover:text-white cursor-pointer"
-          type="submit"
-          variant="outline"
-        >
-          Search
-        </Button>
-
-        {isLoading && (
-          <p className="text-gray-300 text-center text-md font-semibold">
-            Loading...
-          </p>
-        )}
-
-        {error && (
-          <p className="text-red-600 text-center">Error occurred: {error}</p>
-        )}
-
-        {cityWeather && !error && !isLoading && (
-          <div className="text-white bg-[#1f2937] rounded-lg px-8 py-4">
-            <p className="text-center text-3xl font-bold">
-              {cityWeather.name}, {cityWeather.sys.country}
-            </p>
-            <div className="w-full flex items-center justify-center gap-4">
-              <img
-                src={`https://openweathermap.org/img/wn/${cityWeather.weather[0].icon}@2x.png`}
-                className="size-16"
-                alt=""
-              />
-              <p className="text-4xl font-bold">
-                {Math.round(cityWeather.main.temp)}°C
-              </p>
-            </div>
-            <p className="text-center text-[#22d3ee] font-medium capitalize">
-              {cityWeather.weather[0].description}
-            </p>
-            <hr className="my-4 border-gray-700" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-center font-semibold mb-1">
-                  {Math.round(cityWeather.main.feels_like)}°C
-                </p>
-                <p className="text-xs text-gray-400 text-center">Feels like</p>
-              </div>
-              <div>
-                <p className="text-center font-semibold mb-1">
-                  {cityWeather.main.humidity}%
-                </p>
-                <p className="text-xs text-gray-400 text-center">Humidity</p>
-              </div>
-              <div>
-                <p className="text-center font-semibold mb-1">
-                  {cityWeather.wind.speed} m/s
-                </p>
-                <p className="text-xs text-gray-400 text-center">Wind</p>
-              </div>
-            </div>
-          </div>
-        )}
+        <WeatherDisplay
+          isLoading={isLoading}
+          error={error}
+          cityWeather={cityWeather}
+        />
       </div>
     </div>
   );
