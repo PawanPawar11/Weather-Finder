@@ -1,14 +1,44 @@
-import { useEffect, useState } from "react";
-import { Button } from "./components/ui/button";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Input } from "./components/ui/input";
+import { Button } from "./components/ui/button";
+
+interface GeoLocation {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+}
+
+interface CityWeather {
+  name: string;
+  sys: {
+    country: string;
+  };
+  weather: {
+    description: string;
+    icon: string;
+  }[];
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  wind: {
+    speed: number;
+  };
+}
+
+interface FetchError extends Error {
+  message: string;
+}
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [weatherData, setWeatherData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [cityToSearch, setCityToSearch] = useState("");
-  const [cityWeather, setCityWeather] = useState(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [weatherData, setWeatherData] = useState<GeoLocation[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cityToSearch, setCityToSearch] = useState<string>("");
+  const [cityWeather, setCityWeather] = useState<CityWeather | null>(null);
 
   useEffect(() => {
     if (!cityToSearch) return;
@@ -24,15 +54,16 @@ const App = () => {
           throw new Error("Error occurred while fetching weather data");
         }
 
-        const result = await response.json();
+        const result: GeoLocation[] = await response.json();
         if (!result || result.length === 0) {
           throw new Error("City not found!");
         }
-        console.log("Resut is: ", result);
+
         setWeatherData(result);
+        setError(null);
       } catch (error) {
-        setError(error.message);
-        console.log("Error is: ", error);
+        const err = error as FetchError;
+        setError(err.message);
       } finally {
         setIsLoading(false);
       }
@@ -42,7 +73,7 @@ const App = () => {
   }, [cityToSearch]);
 
   useEffect(() => {
-    const fetchTempData = async () => {
+    const fetchActualWeatherData = async () => {
       if (weatherData === null) return;
 
       try {
@@ -51,18 +82,18 @@ const App = () => {
           `https://api.openweathermap.org/data/2.5/weather?lat=${weatherData[0].lat}&lon=${weatherData[0].lon}&appid=57b0e17d17e7ac2c4512642f5bca0f88&units=metric`
         );
 
-        const result = await response.json();
-
-        console.log("Resut is: ", result);
+        const result: CityWeather = await response.json();
         setCityWeather(result);
+        setError(null);
       } catch (error) {
-        setError(error.message);
+        const err = error as FetchError;
+        setError(err.message);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTempData();
+    fetchActualWeatherData();
   }, [weatherData]);
 
   return (
@@ -72,7 +103,9 @@ const App = () => {
           Weather Finder
         </h1>
         <Input
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setSearchTerm(e.target.value)
+          }
           className="bg-[#374151] text-white border-none"
           type="text"
           placeholder="Enter your city name..."
