@@ -8,10 +8,17 @@ const fetchWeather = async (city: string): Promise<CityWeather> => {
   if (!city) throw new Error("Please enter a city name");
 
   const geoRes = await axios.get<GeoLocation[]>(
-    `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
+    `https://api.openweathermap.org/geo/1.0/direct`,
+    {
+      params: {
+        q: city,
+        limit: 1,
+        appid: apiKey,
+      },
+    }
   );
 
-  const geoData: GeoLocation[] = geoRes.data;
+  const geoData = geoRes.data;
 
   if (!geoData.length) {
     throw new Error("City not found");
@@ -20,21 +27,25 @@ const fetchWeather = async (city: string): Promise<CityWeather> => {
   const { lat, lon } = geoData[0];
 
   const weatherRes = await axios.get<CityWeather>(
-    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+    `https://api.openweathermap.org/data/2.5/weather`,
+    {
+      params: {
+        lat,
+        lon,
+        appid: apiKey,
+        units: "metric",
+      },
+    }
   );
 
-  const weatherData: CityWeather = weatherRes.data;
-
-  return weatherData;
+  return weatherRes.data;
 };
 
 export const useWeather = (city: string) => {
   return useQuery({
-    queryKey: ["weather", city],
-    queryFn: () => {
-      return fetchWeather(city);
-    },
-    enabled: !!city,
-    retry: false,
+    queryKey: ["weather", city], // caching key
+    queryFn: () => fetchWeather(city),
+    enabled: !!city, // only fetch when city is not empty
+    retry: false, // don’t retry automatically if city not found
   });
 };
