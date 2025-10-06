@@ -1,20 +1,17 @@
-import type { CityWeather, FetchError, GeoLocation } from "@/types";
+import type { CityWeather, GeoLocation } from "@/types";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 const fetchWeather = async (city: string): Promise<CityWeather> => {
   if (!city) throw new Error("Please enter a city name");
 
-  const geoRes = await fetch(
+  const geoRes = await axios.get<GeoLocation[]>(
     `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
   );
 
-  if (!geoRes.ok) {
-    throw new Error("Error while fetching geo co-ordinates of specified city");
-  }
-
-  const geoData: GeoLocation[] = await geoRes.json();
+  const geoData: GeoLocation[] = geoRes.data;
 
   if (!geoData.length) {
     throw new Error("City not found");
@@ -22,15 +19,11 @@ const fetchWeather = async (city: string): Promise<CityWeather> => {
 
   const { lat, lon } = geoData[0];
 
-  const weatherRes = await fetch(
+  const weatherRes = await axios.get<CityWeather>(
     `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
   );
 
-  if (!weatherRes.ok) {
-    throw new Error("Error while fetching weather data of specified city");
-  }
-
-  const weatherData: CityWeather = await weatherRes.json();
+  const weatherData: CityWeather = weatherRes.data;
 
   return weatherData;
 };
@@ -39,7 +32,7 @@ export const useWeather = (city: string) => {
   return useQuery({
     queryKey: ["weather", city],
     queryFn: () => {
-      fetchWeather(city);
+      return fetchWeather(city);
     },
     enabled: !!city,
     retry: false,
