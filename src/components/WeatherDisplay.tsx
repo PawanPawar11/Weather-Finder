@@ -1,25 +1,19 @@
-import type { CityWeather } from "@/App";
+import type { CityWeather } from "@/types";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorMessage from "./ErrorMessage";
 
-interface ChildProps {
+interface Props {
   isLoading: boolean;
   error: string | null;
   cityWeather: CityWeather | null;
 }
 
-const WeatherDisplay: React.FC<ChildProps> = ({
-  isLoading,
-  error,
-  cityWeather,
-}) => {
+const WeatherDisplay: React.FC<Props> = ({ isLoading, error, cityWeather }) => {
   return (
     <>
-      {isLoading && (
-        <p className="text-gray-300 text-center text-md font-semibold">
-          Loading...
-        </p>
-      )}
+      {isLoading && <LoadingSpinner />}
 
-      {error && <p className="text-red-600 text-center">Error: {error}</p>}
+      {error && <ErrorMessage message={error} />}
 
       {cityWeather && !error && !isLoading && (
         <div className="text-white bg-[#1f2937] rounded-lg px-8 py-4">
