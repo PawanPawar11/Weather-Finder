@@ -1,24 +1,19 @@
-import { type ChangeEvent } from "react";
+import { useState, type ChangeEvent } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
+import { useAppStore } from "@/store/useAppStore";
 
-interface Props {
-  setCityToSearch: React.Dispatch<React.SetStateAction<string>>;
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-}
+const SearchBar = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const { setCity } = useAppStore();
 
-const SearchBar: React.FC<Props> = ({
-  setCityToSearch,
-  searchTerm,
-  setSearchTerm,
-}) => {
   const submit = () => {
     const trimmed = searchTerm.trim();
     if (!trimmed) return;
-    setCityToSearch(searchTerm);
+    setCity(searchTerm);
   };
+
   return (
     <>
       <h1 className="text-2xl  text-center font-bold text-[#22d3ee]">

@@ -1,6 +1,7 @@
 import type { CityWeather, GeoLocation } from "@/types";
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useAppStore } from "@/store/useAppStore";
+import { useQuery } from "@tanstack/react-query";
 
 const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -41,7 +42,9 @@ const fetchWeather = async (city: string): Promise<CityWeather> => {
   return weatherRes.data;
 };
 
-export const useWeather = (city: string) => {
+export const useWeather = () => {
+  const { city } = useAppStore();
+
   return useQuery({
     queryKey: ["weather", city], // caching key
     queryFn: () => fetchWeather(city),
