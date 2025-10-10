@@ -1,14 +1,21 @@
-import type { CityWeather } from "@/types";
+import type { CityWeather, DailyForecast } from "@/types";
 import LoadingSpinner from "./LoadingSpinner";
 import ErrorMessage from "./ErrorMessage";
+import ForecastDay from "./ForecastDay";
 
 interface Props {
   isLoading: boolean;
   error: string | null;
   cityWeather: CityWeather | null;
+  forecasts?: DailyForecast[] | null;
 }
 
-const WeatherDisplay: React.FC<Props> = ({ isLoading, error, cityWeather }) => {
+const WeatherDisplay: React.FC<Props> = ({
+  isLoading,
+  error,
+  cityWeather,
+  forecasts,
+}) => {
   return (
     <>
       {isLoading && <LoadingSpinner />}
@@ -16,7 +23,7 @@ const WeatherDisplay: React.FC<Props> = ({ isLoading, error, cityWeather }) => {
       {error && <ErrorMessage message={error} />}
 
       {cityWeather && !error && !isLoading && (
-        <div className="text-white bg-[#1f2937] rounded-lg px-8 py-4">
+        <div className="text-white bg-[#1f2937] rounded-lg px-8 py-4 mt-1">
           <p className="text-center text-3xl font-bold">
             {cityWeather.name}, {cityWeather.sys.country}
           </p>
@@ -53,6 +60,19 @@ const WeatherDisplay: React.FC<Props> = ({ isLoading, error, cityWeather }) => {
               </p>
               <p className="text-xs text-gray-400 text-center">Wind</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {forecasts && forecasts.length > 0 && (
+        <div className="mt-1">
+          <p className="text-sm text-gray-400 mb-3 text-center">
+            5-Day Forecast
+          </p>
+          <div className="flex gap-3 overflow-x-auto px-1">
+            {forecasts.map((f) => (
+              <ForecastDay key={f.date} forecast={f} />
+            ))}
           </div>
         </div>
       )}

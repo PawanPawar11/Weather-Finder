@@ -27,3 +27,37 @@ export interface CityWeather {
 export interface FetchError extends Error {
   message: string;
 }
+
+export interface ForecastApiItem {
+  dt: number;
+  dt_txt: string;
+  main: {
+    temp: number;
+    temp_min: number;
+    temp_max: number;
+  };
+  weather: {
+    description: string;
+    icon: string;
+  }[];
+}
+
+export interface ForecastApiResponse {
+  cod: string;
+  message: number;
+  cnt: number;
+  list: ForecastApiItem[];
+  city: {
+    name: string;
+    country: string;
+  };
+}
+
+export interface DailyForecast {
+  date: string;
+  temp: number;
+  temp_min: number;
+  temp_max: number;
+  description: string;
+  icon: string;
+}
